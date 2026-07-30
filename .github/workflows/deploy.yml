@@ -36,7 +36,9 @@ jobs:
         with:
           path: build
           key: emscripten-build-${{ hashFiles('build.sh', 'src/ssh_shim.c') }}
-
+      - name: Make build script executable
+        run: chmod +x ./build.sh
+        
       - name: Build ssh.wasm
         run: ./build.sh
 
