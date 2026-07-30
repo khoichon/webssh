@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>ssh-wasm-standalone</title>
+  <link rel="stylesheet" href="https://unpkg.com/@xterm/xterm@5/css/xterm.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <form id="connect-form">
+    <input id="host" placeholder="host" required />
+    <input id="port" placeholder="port" value="22" size="4" />
+    <input id="username" placeholder="username" required />
+    <input id="password" placeholder="password" type="password" required />
+    <button type="submit">Connect</button>
+    <span id="status">idle</span>
+  </form>
+
+  <div id="terminal"></div>
+
+  <!-- Verify these against current package READMEs before relying on them —
+       CDN bundle paths / global export names shift between versions. -->
+  <script src="https://unpkg.com/@xterm/xterm@5/lib/xterm.js"></script>
+  <script src="https://unpkg.com/@xterm/addon-fit@0.10/lib/addon-fit.js"></script>
+  <script src="https://unpkg.com/@mercuryworkshop/wisp-js/dist/wisp.js"></script>
+
+  <script src="ssh.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
