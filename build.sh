@@ -53,7 +53,7 @@ mkdir -p "$LIBSSH2_BUILD"
     -DBUILD_SHARED_LIBS=OFF \
     -DBUILD_EXAMPLES=OFF \
     -DBUILD_TESTING=OFF
-  emmake make -j"$(nproc)" libssh2
+  emmake make -j"$(nproc)" libssh2_static
 )
 
 # ---- shim ---------------------------------------------------------------
