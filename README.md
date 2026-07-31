@@ -1,4 +1,4 @@
-# ssh-wasm-standalone
+# webssh
 
 A fully client-side SSH client: libssh2 compiled to WebAssembly, tunneled over
 a public Wisp proxy, rendered in xterm.js. No backend of your own — just
@@ -90,13 +90,14 @@ piece of your own in this loop at all.
 
 ## Known rough edges to expect
 
-- **EAGAIN handling in the recv/send callbacks.** libssh2's non-blocking
-  mode expects `-EAGAIN` back from your I/O callbacks when no data is
-  ready. The shim does this, but exact retry/backoff behavior around
-  `LIBSSH2_ERROR_EAGAIN` at each state (handshake vs. auth vs. channel
-  read) is the part most likely to need tightening — cross-reference
-  libssh2's own `nonblocking.c`/`ssh2_exec_nonblock.c` examples if you see
-  a stall.
+- ~~EAGAIN handling in the recv/send callbacks~~ — **found and fixed**:
+  the callbacks were returning `-1` with `errno = EAGAIN` set (the
+  convention for wrapping a real `recv()`/`send()` syscall), but libssh2
+  actually expects the callback itself to return the sentinel value
+  `-EAGAIN` directly. Returning plain `-1` got read as a hard socket
+  error (`LIBSSH2_ERROR_SOCKET_RECV`, `-43`) instead of "try again."
+  Retry/backoff behavior at each handshake/auth/channel state is still
+  worth watching for stalls, but the core contract is correct now.
 - **Auth methods**: password auth is wired up; public-key auth
   (`ssh_auth_pubkey`) is stubbed — needs a key format decision (paste PEM,
   generate in-browser, etc.) before it's real.

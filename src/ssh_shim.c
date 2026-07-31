@@ -80,13 +80,13 @@ static ssize_t shim_recv(libssh2_socket_t sock, void *buffer, size_t length,
                           int flags, void **abstract) {
     (void)sock; (void)flags; (void)abstract;
     int n = js_wisp_recv((uint8_t *)buffer, (int)length);
-    if (n < 0) {
-        errno = EAGAIN;
-        return -1;
-    }
-    if (n == 0) {
-        errno = EAGAIN;
-        return -1;
+    if (n <= 0) {
+        // libssh2 expects the callback to return the sentinel value
+        // -EAGAIN directly when no data is available yet — not -1 with
+        // errno set, which is the convention for wrapping a real recv()
+        // syscall, not for this callback. Returning plain -1 here gets
+        // read as a hard socket error (LIBSSH2_ERROR_SOCKET_RECV, -43).
+        return -EAGAIN;
     }
     return n;
 }
@@ -96,8 +96,7 @@ static ssize_t shim_send(libssh2_socket_t sock, const void *buffer, size_t lengt
     (void)sock; (void)flags; (void)abstract;
     int n = js_wisp_send((const uint8_t *)buffer, (int)length);
     if (n < 0) {
-        errno = EAGAIN;
-        return -1;
+        return -EAGAIN;
     }
     return n;
 }
