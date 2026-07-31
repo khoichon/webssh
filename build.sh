@@ -69,7 +69,7 @@ emcc "$ROOT/src/ssh_shim.c" \
   -s MODULARIZE=1 \
   -s EXPORT_NAME=createSshModule \
   -s ALLOW_MEMORY_GROWTH=1 \
-  -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap"]' \
+  -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap","UTF8ToString"]' \
   -s ENVIRONMENT=web \
   -o "$ROOT/web/ssh.js"
 

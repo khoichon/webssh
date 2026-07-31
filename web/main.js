@@ -76,7 +76,9 @@ async function boot() {
       setStatus(STATE_NAMES[state] ?? `state ${state}`);
       if (state === 8 /* SSH_STATE_ERROR */) {
         const errPtr = ssh_get_last_error();
-        const msg = sshModule.UTF8ToString(errPtr);
+        const msg = typeof sshModule.UTF8ToString === "function"
+          ? sshModule.UTF8ToString(errPtr)
+          : "(error string unavailable — rebuild with UTF8ToString exported)";
         term.writeln(`\r\n[error] ${msg}`);
       }
     },
