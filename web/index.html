@@ -18,13 +18,12 @@
 
   <div id="terminal"></div>
 
-  <!-- Verify these against current package READMEs before relying on them —
-       CDN bundle paths / global export names shift between versions. -->
+  <!-- @mercuryworkshop/wisp-client-js's dist/wisp.js uses top-level await
+       internally, so it has to be loaded as a module (dynamic import,
+       done inside main.js) rather than a classic <script src> tag. -->
   <script src="https://unpkg.com/@xterm/xterm@5/lib/xterm.js"></script>
   <script src="https://unpkg.com/@xterm/addon-fit@0.10/lib/addon-fit.js"></script>
-  <script src="https://unpkg.com/@mercuryworkshop/wisp-client-js/dist/wisp.js"></script>
-
   <script src="ssh.js"></script>
-  <script src="main.js"></script>
+  <script type="module" src="main.js"></script>
 </body>
 </html>

@@ -8,8 +8,21 @@
 // Module.wispRecv, implemented here against a receive ring buffer fed
 // by the Wisp stream's message events.
 
-// dist/wisp.js (from @mercuryworkshop/wisp-client-js) exposes WispConnection
-// as a plain global — no window.wisp namespace to destructure.
+// dist/wisp.js contains top-level await internally, so it must be loaded
+// as a real module rather than a classic <script> global (that was the
+// earlier "await is only valid ... in modules" error). We import it here
+// and resolve WispConnection from whatever shape it exports rather than
+// assuming one, since the package's README describes an older/different
+// packaging than what's actually published.
+const WispModule = await import("https://unpkg.com/@mercuryworkshop/wisp-client-js/dist/wisp.js");
+const WispConnection = WispModule.WispConnection ?? WispModule.default?.WispConnection;
+if (!WispConnection) {
+  console.error("wisp-client-js module shape:", WispModule);
+  throw new Error(
+    "Couldn't find WispConnection on the imported module — check the console.error above " +
+    "for what keys are actually exported and adjust the lookup in main.js."
+  );
+}
 
 const WISP_URL = "wss://wisp.mercurywork.shop/"; // public proxy: fine for testing, not for anything you depend on.
 
