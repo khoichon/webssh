@@ -8,16 +8,15 @@
 // Module.wispRecv, implemented here against a receive ring buffer fed
 // by the Wisp stream's message events.
 
-// dist/wisp.js contains top-level await internally, so it must be loaded
-// as a real module rather than a classic <script> global (that was the
-// earlier "await is only valid ... in modules" error). We import it here
-// and resolve WispConnection from whatever shape it exports rather than
-// assuming one, since the package's README describes an older/different
-// packaging than what's actually published.
-const WispModule = await import("https://unpkg.com/@mercuryworkshop/wisp-client-js/dist/wisp.js");
+// dist/wisp.js turned out to execute but export nothing (top-level await
+// forces module context, but the file has no `export` statements — a
+// packaging inconsistency in this library). dist/wisp.mjs is the entry
+// point the README describes as meant for `import`, so that's the one
+// that should actually have real exports.
+const WispModule = await import("https://unpkg.com/@mercuryworkshop/wisp-client-js/dist/wisp.mjs");
 const WispConnection = WispModule.WispConnection ?? WispModule.default?.WispConnection;
 if (!WispConnection) {
-  console.error("wisp-client-js module shape:", WispModule);
+  console.error("wisp-client-js module shape:", WispModule, Object.keys(WispModule));
   throw new Error(
     "Couldn't find WispConnection on the imported module — check the console.error above " +
     "for what keys are actually exported and adjust the lookup in main.js."
