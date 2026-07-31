@@ -8,11 +8,8 @@
 // Module.wispRecv, implemented here against a receive ring buffer fed
 // by the Wisp stream's message events.
 
-// NOTE: verify this matches the actual browser global exported by
-// whichever @mercuryworkshop/wisp-js build you pull in via <script> in
-// index.html — check the current npm README, this has shifted across
-// versions.
-const { WispConnection } = window.wisp;
+// dist/wisp.js (from @mercuryworkshop/wisp-client-js) exposes WispConnection
+// as a plain global — no window.wisp namespace to destructure.
 
 const WISP_URL = "wss://wisp.mercurywork.shop/"; // public proxy: fine for testing, not for anything you depend on.
 
