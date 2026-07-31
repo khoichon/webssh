@@ -8,12 +8,11 @@
 // Module.wispRecv, implemented here against a receive ring buffer fed
 // by the Wisp stream's message events.
 
-// dist/wisp.js turned out to execute but export nothing (top-level await
-// forces module context, but the file has no `export` statements — a
-// packaging inconsistency in this library). dist/wisp.mjs is the entry
-// point the README describes as meant for `import`, so that's the one
-// that should actually have real exports.
-const WispModule = await import("https://unpkg.com/@mercuryworkshop/wisp-client-js/dist/wisp.mjs");
+// dist/wisp.js executes (it needs module context because of an internal
+// top-level `await`) but doesn't actually `export` anything, so nothing
+// in it is reachable via `import()`. The real ESM entry point is
+// dist/wisp-client.mjs.
+const WispModule = await import("https://unpkg.com/@mercuryworkshop/wisp-client-js/dist/wisp-client.mjs");
 const WispConnection = WispModule.WispConnection ?? WispModule.default?.WispConnection;
 if (!WispConnection) {
   console.error("wisp-client-js module shape:", WispModule, Object.keys(WispModule));
