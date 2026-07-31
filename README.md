@@ -102,10 +102,12 @@ piece of your own in this loop at all.
   generate in-browser, etc.) before it's real.
 - **PTY resize** is exposed but untested against a real terminal resize
   flow from xterm.js's `onResize`.
-- **wisp-client-js import path**: use `dist/wisp-client.mjs`, not
-  `dist/wisp.js`. The latter executes (it needs module context because
-  of an internal top-level `await`) but doesn't actually `export`
-  anything, so nothing in it is reachable via `import()` — a packaging
-  inconsistency in the library, not something on our end. `main.js` logs
-  the imported module's keys to the console if this ever breaks again,
-  so you can see exactly what's actually exported rather than guessing.
+- **Wisp client library**: uses `@mercuryworkshop/wisp-js` (the actively
+  maintained implementation — the same one backing Ultraviolet, Scramjet,
+  etc.), imported from its ESM entry point at `dist/wisp-client.mjs`,
+  which exports `{ client }`. Its API differs from some other Wisp
+  client packages: connect via `new wisp.ClientConnection(url)`, and
+  streams/connections use `onopen`/`onmessage`/`onclose` callback
+  properties rather than `addEventListener`. `main.js` logs the imported
+  module's keys to the console if this package's exports ever shift, so
+  you can see what's actually there rather than guessing.

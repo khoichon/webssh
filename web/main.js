@@ -8,16 +8,17 @@
 // Module.wispRecv, implemented here against a receive ring buffer fed
 // by the Wisp stream's message events.
 
-// dist/wisp.js executes (it needs module context because of an internal
-// top-level `await`) but doesn't actually `export` anything, so nothing
-// in it is reachable via `import()`. The real ESM entry point is
-// dist/wisp-client.mjs.
-const WispModule = await import("https://unpkg.com/@mercuryworkshop/wisp-client-js/dist/wisp-client.mjs");
-const WispConnection = WispModule.WispConnection ?? WispModule.default?.WispConnection;
-if (!WispConnection) {
-  console.error("wisp-client-js module shape:", WispModule, Object.keys(WispModule));
+// wisp-client-js (the package tried earlier) turned out to be a smaller,
+// less consistently packaged project. Switching to @mercuryworkshop/wisp-js
+// instead — it's the actively maintained implementation (used by
+// Ultraviolet, Scramjet, etc.) with an actual documented ESM entry point:
+// dist/wisp-client.mjs, exporting `{ client }`.
+const WispModule = await import("https://unpkg.com/@mercuryworkshop/wisp-js/dist/wisp-client.mjs");
+const wisp = WispModule.client ?? WispModule.default?.client;
+if (!wisp) {
+  console.error("wisp-js module shape:", WispModule, Object.keys(WispModule));
   throw new Error(
-    "Couldn't find WispConnection on the imported module — check the console.error above " +
+    "Couldn't find the client export on the imported wisp-js module — check the console.error above " +
     "for what keys are actually exported and adjust the lookup in main.js."
   );
 }
@@ -107,16 +108,20 @@ async function onConnect(ev) {
   const password = document.getElementById("password").value;
 
   setStatus("connecting to wisp proxy...");
-  wispConn = new WispConnection(WISP_URL);
-  wispConn.addEventListener("open", () => {
+  wispConn = new wisp.ClientConnection(WISP_URL);
+
+  wispConn.onopen = () => {
     wispStream = wispConn.create_stream(host, port, "tcp");
 
-    wispStream.addEventListener("message", (event) => {
-      recvQueue.push(new Uint8Array(event.data));
-    });
-    wispStream.addEventListener("close", () => {
-      term.writeln("\r\n[wisp stream closed]");
-    });
+    // wisp-js delivers data straight to onmessage as a Uint8Array —
+    // no event wrapper to unwrap, unlike the addEventListener-style API
+    // of the other wisp client package.
+    wispStream.onmessage = (data) => {
+      recvQueue.push(data);
+    };
+    wispStream.onclose = (reason) => {
+      term.writeln(`\r\n[wisp stream closed: ${reason}]`);
+    };
 
     setStatus("wisp stream open, starting ssh handshake...");
     ssh_init();
@@ -131,12 +136,14 @@ async function onConnect(ev) {
         clearInterval(pump);
       }
     }, 20);
-  });
+  };
 
-  wispConn.addEventListener("error", (e) => {
+  wispConn.onerror = () => {
     setStatus("wisp connection error");
-    console.error(e);
-  });
+  };
+  wispConn.onclose = () => {
+    setStatus("wisp connection closed");
+  };
 }
 
 boot();
