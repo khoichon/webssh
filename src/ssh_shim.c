@@ -15,6 +15,7 @@
 #include <libssh2.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <errno.h>
 
 // ---- state ------------------------------------------------------------
@@ -112,8 +113,8 @@ int ssh_init(void) {
     if (!g_session) return -1;
 
     libssh2_session_set_blocking(g_session, 0);
-    libssh2_session_callback_set(g_session, LIBSSH2_CALLBACK_RECV, (void *)shim_recv);
-    libssh2_session_callback_set(g_session, LIBSSH2_CALLBACK_SEND, (void *)shim_send);
+    libssh2_session_callback_set2(g_session, LIBSSH2_CALLBACK_RECV, (libssh2_cb_generic *)shim_recv);
+    libssh2_session_callback_set2(g_session, LIBSSH2_CALLBACK_SEND, (libssh2_cb_generic *)shim_send);
 
     g_state = SSH_STATE_IDLE;
     return 0;
