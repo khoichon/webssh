@@ -102,8 +102,10 @@ piece of your own in this loop at all.
   generate in-browser, etc.) before it's real.
 - **PTY resize** is exposed but untested against a real terminal resize
   flow from xterm.js's `onResize`.
-- **wisp-js browser global name**: resolved — the CDN load in `index.html`
-  points at `@mercuryworkshop/wisp-client-js` (not the differently-scoped
-  `@mercuryworkshop/wisp-js`, which has an unrelated API and was the
-  source of an earlier `window.wisp is undefined` bug). `dist/wisp.js`
-  from the correct package exposes `WispConnection` as a plain global.
+- **wisp-client-js import path**: use `dist/wisp.mjs`, not `dist/wisp.js`.
+  The latter executes (it needs module context because of an internal
+  top-level `await`) but doesn't actually `export` anything, so nothing
+  in it is reachable via `import()` — a packaging inconsistency in the
+  library, not something on our end. `main.js` logs the imported
+  module's keys to the console if this ever breaks again, so you can see
+  exactly what's actually exported rather than guessing.
